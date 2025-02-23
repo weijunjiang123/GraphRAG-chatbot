@@ -2,6 +2,12 @@
 
 This project implements a Retrieval-Augmented Generation (RAG) service using various machine learning models and vector stores. The service is designed to handle queries and provide responses based on the indexed documents.
 
+# Screenshots
+
+![img.png](resources/img.png)
+
+![img_1.png](resources/img_1.png)
+
 ## Table of Contents
 
 - [Installation](#installation)
