@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  rag-backend:
+    build: .
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+    volumes:
+      - ./src:/app/src 
