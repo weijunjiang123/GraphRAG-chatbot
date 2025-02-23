@@ -1,0 +1,9 @@
+pydantic~=2.10.6
+fastapi~=0.115.8
+pydantic-settings~=2.7.1
+uvicorn~=0.34.0
+requests~=2.32.3
+chromadb~=0.6.3
+llama-index-core~=0.12.17
+streamlit~=1.42.0
+ollama~=0.4.7

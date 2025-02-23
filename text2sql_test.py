@@ -1,5 +1,3 @@
-from llama_index.core import download_loader
-
 from llama_index.readers.database import DatabaseReader
 
 DB_SCHEME = "MySQL"

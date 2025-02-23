@@ -1,6 +1,7 @@
 from llama_index.core.base.llms.types import ChatMessage
 from llama_index.llms.ollama import Ollama
 
+
 def chatbot(query: str):
     llm = Ollama(model="llama3.2", request_timeout=360.0)
     messages = [

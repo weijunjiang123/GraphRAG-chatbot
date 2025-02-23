@@ -5,7 +5,6 @@ from llama_index.core import VectorStoreIndex
 from llama_index.core.agent import ReActAgent
 from llama_index.core.tools import QueryEngineTool
 from llama_index.embeddings.ollama import OllamaEmbedding
-from llama_index.llms.azure_openai import AzureOpenAI
 from llama_index.llms.ollama import Ollama
 from llama_index.vector_stores.chroma import ChromaVectorStore
 

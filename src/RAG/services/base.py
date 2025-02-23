@@ -1,15 +1,19 @@
 """基础服务类"""
 import logging
-from functools import wraps
 import time
+from functools import wraps
+
 import requests
+
 from ..core.config import settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def retry_on_failure(max_retries=3, delay=1):
     """重试装饰器"""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -24,11 +28,15 @@ def retry_on_failure(max_retries=3, delay=1):
                     else:
                         raise ValueError(f"Ollama 服务连接失败: {str(e)}")
             return None
+
         return wrapper
+
     return decorator
+
 
 class BaseService:
     """服务基类"""
+
     def __init__(self):
         self.base_url = settings.OLLAMA_BASE_URL
         self.timeout = settings.REQUEST_TIMEOUT
@@ -53,7 +61,7 @@ class BaseService:
         """发送请求到 Ollama 服务"""
         if not self._check_ollama_status():
             raise ValueError("Ollama 服务未启动或无法访问")
-            
+
         url = f"{self.base_url}{endpoint}"
         response = requests.request(
             method,
@@ -61,10 +69,10 @@ class BaseService:
             timeout=self.timeout,
             **kwargs
         )
-        
+
         if response.status_code != 200:
             raise requests.exceptions.RequestException(
                 f"请求失败 (状态码: {response.status_code})"
             )
-            
-        return response.json() 
+
+        return response.json()

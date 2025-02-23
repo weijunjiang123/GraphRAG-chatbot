@@ -1,17 +1,16 @@
 # services.py
-import os
+import logging
+import sys
+import time
+from functools import wraps
+from typing import Optional
+
 import chromadb
-from llama_index.core import StorageContext
+import requests
 from llama_index.core import VectorStoreIndex, Document
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 from llama_index.vector_stores.chroma import ChromaVectorStore
-import logging
-import sys
-from typing import Optional
-import requests
-from functools import wraps
-import time
 
 # 配置日志
 logging.basicConfig(
@@ -32,6 +31,7 @@ LLM_MODEL = "llama3.2"  # 查询时使用的 LLM 模型
 # 定义 embedding 模型实例
 embed_model = OllamaEmbedding(model_name=EMBED_MODEL_NAME)
 
+
 def check_ollama_service(max_retries=3, retry_delay=1):
     """
     检查 Ollama 服务是否可用的装饰器
@@ -40,6 +40,7 @@ def check_ollama_service(max_retries=3, retry_delay=1):
         max_retries: 最大重试次数
         retry_delay: 重试间隔（秒）
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -59,8 +60,11 @@ def check_ollama_service(max_retries=3, retry_delay=1):
                     logger.error("无法连接到 Ollama 服务，请确保服务已启动")
                     raise ValueError("Ollama 服务未启动，请先启动 Ollama 服务")
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
+
 
 @check_ollama_service()
 def build_index_from_file_service(file_content: str) -> str:
@@ -77,11 +81,11 @@ def build_index_from_file_service(file_content: str) -> str:
     """
     if not file_content.strip():
         raise ValueError("文档内容不能为空")
-        
+
     logger.info("开始处理文档并构建索引...")
-    
+
     # 将文件内容构造为 Document 对象
-    
+
     doc = Document(text=file_content)
 
     # 初始化持久化的 Chroma 客户端和 collection
@@ -94,12 +98,13 @@ def build_index_from_file_service(file_content: str) -> str:
         index = VectorStoreIndex.from_vector_store(vector_store, embed_model=embed_model)
         # 插入新文档（假设支持增量更新）
         index.insert(doc)
-        
+
         logger.info("索引构建/更新成功")
         return "文档上传成功，索引已更新！"
     except Exception as e:
         logger.error(f"索引构建失败: {str(e)}")
         raise
+
 
 @check_ollama_service()
 def query_index_service(question: str) -> Optional[str]:
@@ -116,9 +121,9 @@ def query_index_service(question: str) -> Optional[str]:
     """
     if not question.strip():
         raise ValueError("问题不能为空")
-        
+
     logger.info(f"开始处理问题: {question}")
-    
+
     try:
         db = chromadb.PersistentClient(path=PERSIST_PATH)
         chroma_collection = db.get_or_create_collection(COLLECTION_NAME)
@@ -133,7 +138,7 @@ def query_index_service(question: str) -> Optional[str]:
                 llm=Ollama(model=LLM_MODEL, request_timeout=360.0)
             )
             response = query_engine.query(question)
-            
+
             logger.info("查询完成")
             return str(response)
         except Exception as e:
@@ -143,6 +148,7 @@ def query_index_service(question: str) -> Optional[str]:
     except Exception as e:
         logger.error(f"查询失败: {str(e)}")
         raise
+
 
 # 添加一个新的函数用于检查服务状态
 def check_services_status() -> dict:
@@ -156,14 +162,14 @@ def check_services_status() -> dict:
         "ollama": False,
         "chroma": False
     }
-    
+
     # 检查 Ollama 服务
     try:
         response = requests.get("http://localhost:11434/api/tags")
         status["ollama"] = response.status_code == 200
     except:
         pass
-    
+
     # 检查 Chroma 数据库
     try:
         db = chromadb.PersistentClient(path=PERSIST_PATH)
@@ -171,5 +177,5 @@ def check_services_status() -> dict:
         status["chroma"] = True
     except:
         pass
-    
+
     return status

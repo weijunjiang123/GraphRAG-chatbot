@@ -1,11 +1,8 @@
-import sys
-import os
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 
 from src.RAG.api.routes import router
-from src.RAG.core.config import settings
 
 app = FastAPI(title="RAG Agent 后端服务")
 
@@ -21,9 +18,11 @@ app.add_middleware(
 # 注册路由
 app.include_router(router)
 
+
 @app.get("/")
 def read_root():
     return {"message": "RAG Agent 后端服务已启动"}
+
 
 if __name__ == "__main__":
     uvicorn.run(
@@ -31,4 +30,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=True  # 开发模式下启用热重载
-    ) 
+    )
+
