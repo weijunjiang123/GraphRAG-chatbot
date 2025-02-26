@@ -38,8 +38,8 @@ class BaseService:
     """服务基类"""
 
     def __init__(self):
-        self.base_url = settings.OLLAMA_BASE_URL
-        self.timeout = settings.REQUEST_TIMEOUT
+        self.base_url = settings.llm.OLLAMA_BASE_URL
+        self.timeout = settings.api.REQUEST_TIMEOUT
 
     def _check_ollama_status(self):
         """检查 Ollama 服务状态"""
@@ -56,7 +56,7 @@ class BaseService:
             logger.error(f"无法连接到 Ollama 服务: {str(e)}")
             return False
 
-    @retry_on_failure(max_retries=settings.MAX_RETRIES, delay=settings.RETRY_DELAY)
+    @retry_on_failure()
     def _make_request(self, method, endpoint, **kwargs):
         """发送请求到 Ollama 服务"""
         if not self._check_ollama_status():

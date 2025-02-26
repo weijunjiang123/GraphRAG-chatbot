@@ -3,10 +3,47 @@ version: '3.8'
 services:
   rag-backend:
     build: .
+    container_name: rag-backend
     ports:
       - "${PORT:-8000}:8000"
     environment:
       - HOST=0.0.0.0
       - PORT=8000
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PROVIDER=${PROVIDER:-ollama}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ARK_API_KEY=${ARK_API_KEY:-}
+      - VOLCES_BASE_URL=${VOLCES_BASE_URL:-https://ark.cn-beijing.volces.com/api/v3}
     volumes:
-      - ./src:/app/src 
+      - ./src:/app/src
+      - ./data:/app/data
+      - chroma_data:/app/src/RAG/chroma_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  rag-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: rag-frontend
+    ports:
+      - "${FRONTEND_PORT:-8501}:8501"
+    environment:
+      - BACKEND_URL=http://rag-backend:8000/api
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - rag-backend
+    restart: unless-stopped
+
+volumes:
+  chroma_data:
+    name: graphrag-chroma-data
